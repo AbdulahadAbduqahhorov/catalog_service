@@ -1,0 +1,3 @@
+[submodule "ecommerce-protos"]
+	path = ecommerce-protos
+	url = git@github.com:AbdulahadAbduqahhorov/ecommerce-protos.git
