@@ -15,7 +15,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	c := fmt.Sprintf(
+	conn := fmt.Sprintf(
 		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
 		cfg.PostgresHost,
 		cfg.PostgresPort,
@@ -23,8 +23,9 @@ func main() {
 		cfg.PostgresPassword,
 		cfg.PostgresDatabase)
 
+
 	//**Db connection
-	db, err := sqlx.Connect("postgres", c)
+	db, err := sqlx.Connect("postgres", conn)
 	if err != nil {
 		log.Fatalf("database connection error: %v", err)
 	}

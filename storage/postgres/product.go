@@ -167,19 +167,43 @@ func (p productRepo) GetProductById(id string) (*product_service.GetProductByIdR
 }
 
 func (p productRepo) UpdateProduct(req *product_service.UpdateProductRequest) (int64, error) {
-	query := `UPDATE product SET
-		title = $1,
-		description = $2,
-		quantity = $3,
-		price = $4,
-		updated_at = now()
-	WHERE
-		id = $5`
-	result, err := p.db.Exec(query, req.Title, req.Desc, req.Quantity, req.Price, req.Id)
-	if err != nil {
-		return 0, err
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+	if len(strings.Trim(req.Title," "))>0 {
+		setValues = append(setValues, fmt.Sprintf("title=$%d ", argId))
+		args = append(args, req.Title)
+		argId++
+	}
+	if len(strings.Trim(req.Desc," "))>0 {
+		setValues = append(setValues, fmt.Sprintf("description=$%d ", argId))
+		args = append(args, req.Desc)
+		argId++
+	}
+	if req.Quantity>0 {
+		setValues = append(setValues, fmt.Sprintf("quantity=$%d ", argId))
+		args = append(args, req.Quantity)
+		argId++
+	}
+	if req.Price>0 {
+		setValues = append(setValues, fmt.Sprintf("price=$%d ", argId))
+		args = append(args, req.Price)
+		argId++
 	}
 
+	s := strings.Join(setValues, ",")
+	query := fmt.Sprintf(`
+			UPDATE product
+			SET %s ,updated_at = now()
+			WHERE id = $%d`,
+			s,argId)
+	fmt.Println(query)
+	args = append(args,req.Id)
+
+	result, err := p.db.Exec(query, args...)
+	if err != nil {
+		return 0,err
+	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return 0, err
