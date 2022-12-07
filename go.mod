@@ -1,4 +1,4 @@
-module github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service
+module github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service
 
 go 1.19
 

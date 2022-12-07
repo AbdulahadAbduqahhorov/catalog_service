@@ -3,107 +3,105 @@ package service
 import (
 	"context"
 
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/genproto/product_service"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/storage"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/product_service"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/storage"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type ProductService struct {
+type productService struct {
 	product_service.UnimplementedProductServiceServer
-	Stg storage.StorageI
+	stg storage.StorageI
 }
 
-func NewProductService(db *sqlx.DB) *ProductService {
-	return &ProductService{
-		Stg: storage.NewStoragePg(db),
+func NewProductService(db *sqlx.DB) *productService {
+	return &productService{
+		stg: storage.NewStoragePg(db),
 	}
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, req *product_service.CreateProductRequest) (*product_service.CreateProductResponse, error) {
+func (s *productService) CreateProduct(ctx context.Context, req *product_service.CreateProductRequest) (*product_service.CreateProductResponse, error) {
 
-	// _, err := s.Stg.Category().GetCategoryById(req.CategoryId)
+	// _, err := s.stg.Category().GetCategoryById(req.CategoryId)
 	// if err != nil {
 	// 	return nil, status.Errorf(codes.NotFound, "method GetCategoryById: %v",err)
 
 	// }
 	id := uuid.New().String()
 
-	err := s.Stg.Product().CreateProduct(id,req)
+	err := s.stg.Product().CreateProduct(id, req)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method CreateProduct: %v",err)
+		return nil, status.Errorf(codes.Internal, "method CreateProduct: %v", err)
 	}
 
-	_, err = s.Stg.Product().GetProductById(id)
+	_, err = s.stg.Product().GetProductById(id)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method GetProductById: %v",err)
+		return nil, status.Errorf(codes.Internal, "method GetProductById: %v", err)
 
 	}
 
 	return &product_service.CreateProductResponse{
 		Id: id,
-		},nil
+	}, nil
 }
-func (s *ProductService) GetProductList(ctx context.Context,req *product_service.GetProductListRequest) (*product_service.GetProductListResponse, error) {
+func (s *productService) GetProductList(ctx context.Context, req *product_service.GetProductListRequest) (*product_service.GetProductListResponse, error) {
 
-	res, err := s.Stg.Product().GetProductList(req)
+	res, err := s.stg.Product().GetProductList(req)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method GetProductList: %v",err)
+		return nil, status.Errorf(codes.Internal, "method GetProductList: %v", err)
 
 	}
-	return res,nil
+	return res, nil
 }
-func (s *ProductService) GetProductById(ctx context.Context,req *product_service.GetProductByIdRequest) (*product_service.GetProductByIdResponse, error) {
+func (s *productService) GetProductById(ctx context.Context, req *product_service.GetProductByIdRequest) (*product_service.GetProductByIdResponse, error) {
 
-	res, err := s.Stg.Product().GetProductById(req.Id)
+	res, err := s.stg.Product().GetProductById(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method GetProductById: %v",err)
+		return nil, status.Errorf(codes.Internal, "method GetProductById: %v", err)
 
 	}
-	return res,nil
+	return res, nil
 
 }
-func (s *ProductService) UpdateProduct(ctx context.Context,req *product_service.UpdateProductRequest) (*product_service.Product, error) {
-	
-	
-	rowsAffected,err := s.Stg.Product().UpdateProduct(req)
+func (s *productService) UpdateProduct(ctx context.Context, req *product_service.UpdateProductRequest) (*product_service.Product, error) {
+
+	rowsAffected, err := s.stg.Product().UpdateProduct(req)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "method UpdateProduct: %v",err)
+		return nil, status.Errorf(codes.InvalidArgument, "method UpdateProduct: %v", err)
 	}
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
-	product, err := s.Stg.Product().GetProductById(req.Id)
+	product, err := s.stg.Product().GetProductById(req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method GetProductById: %v",err)
-	
+		return nil, status.Errorf(codes.Internal, "method GetProductById: %v", err)
+
 	}
 	return &product_service.Product{
-		Id:product.Id,
-		Title: product.Title,
-		Desc: product.Desc,
-		Quantity: product.Quantity,
-		Price: product.Price,
+		Id:         product.Id,
+		Title:      product.Title,
+		Desc:       product.Desc,
+		Quantity:   product.Quantity,
+		Price:      product.Price,
 		CategoryId: product.Category.Id,
-		CreatedAt:product.CreatedAt,
-		UpdatedAt: product.UpdatedAt,
-	},nil
+		CreatedAt:  product.CreatedAt,
+		UpdatedAt:  product.UpdatedAt,
+	}, nil
 }
-func (s *ProductService) DeleteProduct(ctx context.Context,req *product_service.DeleteProductRequest) (*product_service.Empty, error) {
+func (s *productService) DeleteProduct(ctx context.Context, req *product_service.DeleteProductRequest) (*product_service.Empty, error) {
 
-	rowsAffected,err := s.Stg.Product().DeleteProduct(req.Id)
+	rowsAffected, err := s.stg.Product().DeleteProduct(req.Id)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "method DeleteProduct : %v",err)
-	
+		return nil, status.Errorf(codes.Internal, "method DeleteProduct : %v", err)
+
 	}
 	if rowsAffected <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
 	}
 
-	return &product_service.Empty{},nil
-	
+	return &product_service.Empty{}, nil
 
 }
