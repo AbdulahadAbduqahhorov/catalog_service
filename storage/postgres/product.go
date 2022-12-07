@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/genproto/product_service"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/storage/repo"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/product_service"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/storage/repo"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,7 +21,6 @@ func NewProductRepo(db *sqlx.DB) repo.ProductRepoI {
 }
 
 func (p productRepo) CreateProduct(id string, req *product_service.CreateProductRequest) error {
-
 	query := `INSERT INTO product (
 		id,
 		title,
@@ -32,18 +31,20 @@ func (p productRepo) CreateProduct(id string, req *product_service.CreateProduct
 	) 
 	VALUES ($1, $2, $3,$4,$5,$6) `
 	_, err := p.db.Exec(query, id, req.Title, req.Desc, req.Quantity, req.Price, req.CategoryId)
-
-	return err
-
+	
+	if err != nil {
+		return err
+	}
+	return nil
 }
 func (p productRepo) GetProductList(req *product_service.GetProductListRequest) (*product_service.GetProductListResponse, error) {
-	res:=&product_service.GetProductListResponse{
+	res := &product_service.GetProductListResponse{
 		Products: make([]*product_service.Product, 0),
 	}
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
-	if len(req.CategoryId) >0 {
+	if len(req.CategoryId) > 0 {
 		setValues = append(setValues, fmt.Sprintf("AND category_id=$%d", argId))
 		args = append(args, req.CategoryId)
 		argId++
@@ -53,27 +54,27 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 		args = append(args, req.Search)
 		argId++
 	}
-	
-	countQuery := `SELECT count(1) FROM product  WHERE true ` + strings.Join(setValues," ")
-	err := p.db.QueryRow( countQuery, args...).Scan(
+
+	countQuery := `SELECT count(1) FROM product  WHERE true ` + strings.Join(setValues, " ")
+	err := p.db.QueryRow(countQuery, args...).Scan(
 		&res.Count,
 	)
 	if err != nil {
 		return nil, err
 	}
-	if req.Limit >0 {
+	if req.Limit > 0 {
 		setValues = append(setValues, fmt.Sprintf("limit $%d ", argId))
-		args = append(args,req.Limit)
+		args = append(args, req.Limit)
 		argId++
 	}
-	if req.Offset >=0 {
+	if req.Offset >= 0 {
 		setValues = append(setValues, fmt.Sprintf("offset $%d ", argId))
 		args = append(args, req.Offset)
 		argId++
 	}
-	
+
 	s := strings.Join(setValues, " ")
-	query:=`SELECT
+	query := `SELECT
 	id,
 	title,
 	description,
@@ -82,7 +83,7 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	category_id,
 	created_at,
 	updated_at
-	FROM product WHERE true `+s
+	FROM product WHERE true ` + s
 
 	rows, err := p.db.Query(query, args...)
 	if err != nil {
@@ -93,7 +94,7 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	for rows.Next() {
 		obj := &product_service.Product{}
 		var updatedAt sql.NullString
-		
+
 		err = rows.Scan(
 			&obj.Id,
 			&obj.Title,
@@ -116,10 +117,12 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	}
 
 	return res, nil
-	
+
 }
 func (p productRepo) GetProductById(id string) (*product_service.GetProductByIdResponse, error) {
-	res := &product_service.GetProductByIdResponse{}
+	res := &product_service.GetProductByIdResponse{
+		Category: &product_service.GetProductByIdResponse_Category{},
+	}
 
 	var updatedAt, categoryUpdatedAt sql.NullString
 	query := `
@@ -164,19 +167,43 @@ func (p productRepo) GetProductById(id string) (*product_service.GetProductByIdR
 }
 
 func (p productRepo) UpdateProduct(req *product_service.UpdateProductRequest) (int64, error) {
-	query := `UPDATE product SET
-		title = $1,
-		description = $2,
-		quantity = $3,
-		price = $4,
-		updated_at = now()
-	WHERE
-		id = $5`
-	result, err := p.db.Exec(query, req.Title, req.Desc, req.Quantity, req.Price, req.Id)
-	if err != nil {
-		return 0, err
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+	if len(strings.Trim(req.Title," "))>0 {
+		setValues = append(setValues, fmt.Sprintf("title=$%d ", argId))
+		args = append(args, req.Title)
+		argId++
+	}
+	if len(strings.Trim(req.Desc," "))>0 {
+		setValues = append(setValues, fmt.Sprintf("description=$%d ", argId))
+		args = append(args, req.Desc)
+		argId++
+	}
+	if req.Quantity>0 {
+		setValues = append(setValues, fmt.Sprintf("quantity=$%d ", argId))
+		args = append(args, req.Quantity)
+		argId++
+	}
+	if req.Price>0 {
+		setValues = append(setValues, fmt.Sprintf("price=$%d ", argId))
+		args = append(args, req.Price)
+		argId++
 	}
 
+	s := strings.Join(setValues, ",")
+	query := fmt.Sprintf(`
+			UPDATE product
+			SET %s ,updated_at = now()
+			WHERE id = $%d`,
+			s,argId)
+	fmt.Println(query)
+	args = append(args,req.Id)
+
+	result, err := p.db.Exec(query, args...)
+	if err != nil {
+		return 0,err
+	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return 0, err

@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/config"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/genproto/product_service"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_service/service"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/config"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/product_service"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/service"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/gommon/log"
-	"google.golang.org/grpc"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
 )
 
 func main() {
-
 	cfg := config.Load()
-	connP := fmt.Sprintf(
+	conn := fmt.Sprintf(
 		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
 		cfg.PostgresHost,
 		cfg.PostgresPort,
@@ -24,12 +23,14 @@ func main() {
 		cfg.PostgresPassword,
 		cfg.PostgresDatabase)
 
-	db, err := sqlx.Connect("postgres", connP)
-	if err != nil {
-		panic(err)
-	}
-	productService := service.NewProductService(db)
 
+	//**Db connection
+	db, err := sqlx.Connect("postgres", conn)
+	if err != nil {
+		log.Fatalf("database connection error: %v", err)
+	}
+
+	productService := service.NewProductService(db)
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
 		log.Error("error while listening: %v", err)
