@@ -10,17 +10,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// StorageI ...
-type StorageI interface {
-	CreateCategory(id string, entity *category_service.CreateCategoryRequest) error
-	GetCategoryByID(id string) (*category_service.GetCategoryIDResponse, error)
-	GetCategoryList(offset, limit int, search string) (resp *category_service.GetCategoryListResponse, err error)
-	UpdateCategory(entity *category_service.UpdateCategoryRequest) error
-	DeleteCategory(id string) error
-}
-
-// categoryService := category.NewCategoryService(stg)
-// category_service.RegisterCategoryServiceServer(srv, categoryService)
 
 type categoryService struct {
 	stg storage.StorageI
@@ -38,12 +27,12 @@ func NewCategoryService(stg storage.StorageI) *categoryService {
 func (s *categoryService) CreateCategory(ctx context.Context, req *category_service.CreateCategoryRequest) (*category_service.Category, error) {
 	id := uuid.New()
 
-	err := s.stg.CreateCategory(id.String(), req)
+	err := s.stg.Category().CreateCategory(id.String(), req)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.CreateCategory: %s", err.Error())
 	}
 
-	category, err := s.stg.GetCategoryByID(id.String())
+	category, err := s.stg.Category().GetCategoryByID(id.String())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.Stg.GetCategoryByID: %s", err.Error())
 	}
@@ -57,8 +46,8 @@ func (s *categoryService) CreateCategory(ctx context.Context, req *category_serv
 }
 
 // GetArticleList ....
-func (s *categoryService) GetCategoryList(ctx context.Context, req *category_service.GetCategoryRequest) (*category_service.GetCategoryListResponse, error) {
-	res, err := s.stg.GetCategoryList(int(req.Offset), int(req.Limit), req.Search)
+func (s *categoryService) GetCategoryList(ctx context.Context, req *category_service.GetCategoryListRequest) (*category_service.GetCategoryListResponse, error) {
+	res, err := s.stg.Category().GetCategoryList(int(req.Offset), int(req.Limit), req.Search)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.DeleteCategory: %s", err.Error())
 	}
@@ -67,8 +56,8 @@ func (s *categoryService) GetCategoryList(ctx context.Context, req *category_ser
 }
 
 // GetCategoryByID ....
-func (s *categoryService) GetCategoryByID(ctx context.Context, req *category_service.GetCategoryByIDRequest) (*category_service.GetCategoryByIDResponse, error) {
-	category, err := s.stg.GetCategoryByID(req.Id)
+func (s *categoryService) GetCategoryByID(ctx context.Context, req *category_service.GetCategoryByIdRequest) (*category_service.Category, error) {
+	category, err := s.stg.Category().GetCategoryByID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.GetCategoryByID: %s", err.Error())
 	}
@@ -78,12 +67,12 @@ func (s *categoryService) GetCategoryByID(ctx context.Context, req *category_ser
 
 // UpdateCategory ....
 func (s *categoryService) UpdateCategory(ctx context.Context, req *category_service.UpdateCategoryRequest) (*category_service.Category, error) {
-	err := s.stg.UpdateCategory(req)
+	err := s.stg.Category().UpdateCategory(req)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.UpdateCategory: %s", err.Error())
 	}
 
-	category, err := s.stg.GetCategoryByID(req.Id)
+	category, err := s.stg.Category().GetCategoryByID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.GetCategoryByID: %s", err.Error())
 	}
@@ -98,12 +87,12 @@ func (s *categoryService) UpdateCategory(ctx context.Context, req *category_serv
 
 // DeleteCategory ....
 func (s *categoryService) DeleteCategory(ctx context.Context, req *category_service.DeleteCategoryRequest) (*category_service.Category, error) {
-	category, err := s.stg.GetCategoryByID(req.Id)
+	category, err := s.stg.Category().GetCategoryByID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.GetCategoryByID: %s", err.Error())
 	}
 
-	err = s.stg.DeleteCategory(category.Id)
+	err = s.stg.Category().DeleteCategory(category.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.DeleteCategory: %s", err.Error())
 	}

@@ -10,3 +10,5 @@ pull-proto-module:
 update-proto-module:
 	git submodule foreach --recursive git pull
 	# git submodule update --remote --merge
+pull-proto:
+	git submodule update --init --recursive
