@@ -6,10 +6,10 @@ import (
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/category_service"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/storage"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
 
 type categoryService struct {
 	stg storage.StorageI
@@ -17,9 +17,9 @@ type categoryService struct {
 }
 
 // NewCategoryService ...
-func NewCategoryService(stg storage.StorageI) *categoryService {
+func NewCategoryService(db *sqlx.DB) *categoryService {
 	return &categoryService{
-		stg: stg,
+		stg: storage.NewStoragePg(db),
 	}
 }
 
@@ -86,7 +86,7 @@ func (s *categoryService) UpdateCategory(ctx context.Context, req *category_serv
 }
 
 // DeleteCategory ....
-func (s *categoryService) DeleteCategory(ctx context.Context, req *category_service.DeleteCategoryRequest) (*category_service.Category, error) {
+func (s *categoryService) DeleteCategory(ctx context.Context, req *category_service.DeleteCategoryRequest) (*category_service.DeleteCategoryResponse, error) {
 	category, err := s.stg.Category().GetCategoryByID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "s.stg.GetCategoryByID: %s", err.Error())
@@ -97,10 +97,5 @@ func (s *categoryService) DeleteCategory(ctx context.Context, req *category_serv
 		return nil, status.Errorf(codes.Internal, "s.stg.DeleteCategory: %s", err.Error())
 	}
 
-	return &category_service.Category{
-		Id:        category.Id,
-		Title:     category.Title,
-		CreatedAt: category.CreatedAt,
-		UpdatedAt: category.UpdatedAt,
-	}, nil
+	return &category_service.DeleteCategoryResponse{}, nil
 }

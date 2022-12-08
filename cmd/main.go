@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/config"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/category_service"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/genproto/product_service"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/pkg/logger"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/catalog_service/service"
@@ -32,6 +33,7 @@ func main() {
 		return
 	}
 	productService := service.NewProductService(log, db)
+	categoryService := service.NewCategoryService(db)
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
 		log.Error("error while listening: %v", logger.Error(err))
@@ -39,6 +41,7 @@ func main() {
 	}
 	service := grpc.NewServer()
 	product_service.RegisterProductServiceServer(service, productService)
+	category_service.RegisterCategoryServiceServer(service, categoryService)
 
 	log.Info("main: server running",
 		logger.String("port", cfg.GrpcPort))
