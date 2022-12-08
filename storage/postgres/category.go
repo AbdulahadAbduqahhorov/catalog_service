@@ -15,6 +15,7 @@ type categoryRepo struct {
 
 func NewCategoryRepo(db *sqlx.DB) repo.CategoryRepoI {
 	return categoryRepo{
+		
 		db: db,
 	}
 }
