@@ -27,14 +27,14 @@ func NewProductService(log logger.LoggerI, db *sqlx.DB) *productService {
 
 func (s *productService) CreateProduct(ctx context.Context, req *product_service.CreateProductRequest) (*product_service.CreateProductResponse, error) {
 	s.log.Info("---CreateProduct--->", logger.Any("req", req))
-	// _, err := s.stg.Category().GetCategoryById(req.CategoryId)
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.NotFound, "method GetCategoryById: %v",err)
+	_, err := s.stg.Category().GetCategoryByID(req.CategoryId)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "method GetCategoryById: %v",err)
 
-	// }
+	}
 	id := uuid.New().String()
 
-	err := s.stg.Product().CreateProduct(id, req)
+	err = s.stg.Product().CreateProduct(id, req)
 	if err != nil {
 		s.log.Error("!!!CreateProduct--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())	
@@ -80,7 +80,7 @@ func (s *productService) UpdateProduct(ctx context.Context, req *product_service
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+		return nil, status.Error(codes.NotFound, "no rows were affected")
 	}
 	product, err := s.stg.Product().GetProductById(req.Id)
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *productService) DeleteProduct(ctx context.Context, req *product_service
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if rowsAffected <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "no rows were affected")
+		return nil, status.Error(codes.NotFound, "no rows were affected")
 	}
 
 	return &product_service.Empty{}, nil

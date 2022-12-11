@@ -16,7 +16,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	log := logger.NewLogger("product_service", cfg.Environment)
+	log := logger.NewLogger("catalog_service", cfg.Environment)
 	defer logger.Cleanup(log)
 	conn := fmt.Sprintf(
 		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
