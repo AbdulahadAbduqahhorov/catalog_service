@@ -33,7 +33,7 @@ func main() {
 		return
 	}
 	productService := service.NewProductService(log, db)
-	categoryService := service.NewCategoryService(db)
+	categoryService := service.NewCategoryService(log,db)
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
 		log.Error("error while listening: %v", logger.Error(err))
