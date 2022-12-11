@@ -29,6 +29,7 @@ func (s *productService) CreateProduct(ctx context.Context, req *product_service
 	s.log.Info("---CreateProduct--->", logger.Any("req", req))
 	_, err := s.stg.Category().GetCategoryByID(req.CategoryId)
 	if err != nil {
+		s.log.Error("!!!GetCategoryByID--->", logger.Error(err))
 		return nil, status.Errorf(codes.NotFound, "method GetCategoryById: %v",err)
 
 	}
