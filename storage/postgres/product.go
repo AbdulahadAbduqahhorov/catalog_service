@@ -62,7 +62,11 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	if err != nil {
 		return nil, err
 	}
-	//! TODO- order by 
+	if req.OrderBy=="Price High to Low"  {
+		setValues = append(setValues, "order by price desc ")
+	}else{
+		setValues = append(setValues, "order by price asc ")
+	}
 	if req.Limit > 0 {
 		setValues = append(setValues, fmt.Sprintf("limit $%d ", argId))
 		args = append(args, req.Limit)
@@ -73,7 +77,7 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 		args = append(args, req.Offset)
 		argId++
 	}
-
+	
 	s := strings.Join(setValues, " ")
 	query := `SELECT
 	id,
@@ -85,7 +89,7 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	created_at,
 	updated_at
 	FROM product WHERE true ` + s
-
+	
 	rows, err := p.db.Query(query, args...)
 	if err != nil {
 		return nil, err

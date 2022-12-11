@@ -35,6 +35,7 @@ func (c categoryRepo) CreateCategory(id string, req *category_service.CreateCate
 
 // GetCategoryList ...
 func (c categoryRepo) GetCategoryList(offset, limit int, search string) (*category_service.GetCategoryListResponse, error) {
+	// ! Todo-counter for elements
 	res := &category_service.GetCategoryListResponse{
 		Categories: make([]*category_service.Category, 0),
 	}
@@ -80,7 +81,7 @@ func (c categoryRepo) GetCategoryList(offset, limit int, search string) (*catego
 }
 
 // GetCategoryByID ...
-func (c categoryRepo) GetCategoryByID(id string) (*category_service.Category, error) {
+func (c categoryRepo) GetCategoryById(id string) (*category_service.Category, error) {
 	res := &category_service.Category{}
 
 	var updatedAt sql.NullString
@@ -89,7 +90,7 @@ func (c categoryRepo) GetCategoryByID(id string) (*category_service.Category, er
 		c.id,
 		c.title,
 		c.created_at,
-		c.updated_at,
+		c.updated_at
 	FROM category c  WHERE c.id=$1 `
 	err := c.db.QueryRow(query, id).Scan(
 		&res.Id,

@@ -27,7 +27,7 @@ func NewProductService(log logger.LoggerI, db *sqlx.DB) *productService {
 
 func (s *productService) CreateProduct(ctx context.Context, req *product_service.CreateProductRequest) (*product_service.CreateProductResponse, error) {
 	s.log.Info("---CreateProduct--->", logger.Any("req", req))
-	_, err := s.stg.Category().GetCategoryByID(req.CategoryId)
+	_, err := s.stg.Category().GetCategoryById(req.CategoryId)
 	if err != nil {
 		s.log.Error("!!!GetCategoryByID--->", logger.Error(err))
 		return nil, status.Errorf(codes.NotFound, "method GetCategoryById: %v",err)
