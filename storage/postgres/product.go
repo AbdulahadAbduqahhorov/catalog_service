@@ -62,6 +62,7 @@ func (p productRepo) GetProductList(req *product_service.GetProductListRequest) 
 	if err != nil {
 		return nil, err
 	}
+	//! TODO- order by 
 	if req.Limit > 0 {
 		setValues = append(setValues, fmt.Sprintf("limit $%d ", argId))
 		args = append(args, req.Limit)
@@ -197,7 +198,7 @@ func (p productRepo) UpdateProduct(req *product_service.UpdateProductRequest) (i
 			SET %s ,updated_at = now()
 			WHERE id = $%d`,
 			s,argId)
-	fmt.Println(query)
+			
 	args = append(args,req.Id)
 
 	result, err := p.db.Exec(query, args...)

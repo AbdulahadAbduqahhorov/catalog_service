@@ -16,7 +16,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	log := logger.NewLogger("product_service", cfg.Environment)
+	log := logger.NewLogger("catalog_service", cfg.Environment)
 	defer logger.Cleanup(log)
 	conn := fmt.Sprintf(
 		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
@@ -33,7 +33,7 @@ func main() {
 		return
 	}
 	productService := service.NewProductService(log, db)
-	categoryService := service.NewCategoryService(db)
+	categoryService := service.NewCategoryService(log,db)
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
 		log.Error("error while listening: %v", logger.Error(err))
