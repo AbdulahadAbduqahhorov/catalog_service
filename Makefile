@@ -9,4 +9,3 @@ pull-proto-module:
 
 update-proto-module:
 	git submodule foreach --recursive git pull
-	# git submodule update --remote --merge
