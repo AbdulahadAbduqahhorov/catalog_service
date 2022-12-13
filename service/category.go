@@ -38,7 +38,7 @@ func (s *categoryService) CreateCategory(ctx context.Context, req *category_serv
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	category, err := s.stg.Category().GetCategoryByID(id.String())
+	category, err := s.stg.Category().GetCategoryById(id.String())
 	if err != nil {
 		s.log.Error("!!!CreateCategory--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
@@ -65,11 +65,11 @@ func (s *categoryService) GetCategoryList(ctx context.Context, req *category_ser
 }
 
 // GetCategoryByID ....
-func (s *categoryService) GetCategoryByID(ctx context.Context, req *category_service.GetCategoryByIdRequest) (*category_service.Category, error) {
-	s.log.Info("---GetCategoryByID--->", logger.Any("req", req))
-	category, err := s.stg.Category().GetCategoryByID(req.Id)
+func (s *categoryService) GetCategoryById(ctx context.Context, req *category_service.GetCategoryByIdRequest) (*category_service.Category, error) {
+	s.log.Info("---GetCategoryById--->", logger.Any("req", req))
+	category, err := s.stg.Category().GetCategoryById(req.Id)
 	if err != nil {
-		s.log.Error("!!!GetCategoryByID--->", logger.Error(err))
+		s.log.Error("!!!GetCategoryById--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())	
 	}
 
@@ -85,7 +85,7 @@ func (s *categoryService) UpdateCategory(ctx context.Context, req *category_serv
 		return nil, status.Error(codes.InvalidArgument, err.Error())	
 	}
 
-	category, err := s.stg.Category().GetCategoryByID(req.Id)
+	category, err := s.stg.Category().GetCategoryById(req.Id)
 	if err != nil {
 		s.log.Error("!!!UpdateCategory--->", logger.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())	
@@ -103,15 +103,15 @@ func (s *categoryService) UpdateCategory(ctx context.Context, req *category_serv
 func (s *categoryService) DeleteCategory(ctx context.Context, req *category_service.DeleteCategoryRequest) (*category_service.DeleteCategoryResponse, error) {
 	s.log.Info("---DeleteCategory--->", logger.Any("req", req))
 
-	category, err := s.stg.Category().GetCategoryByID(req.Id)
+	category, err := s.stg.Category().GetCategoryById(req.Id)
 	if err != nil {
 		s.log.Error("!!!DeleteCategory--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())		}
+		return nil, status.Error(codes.NotFound, err.Error())		}
 
 	err = s.stg.Category().DeleteCategory(category.Id)
 	if err != nil {
 		s.log.Error("!!!DeleteCategory--->", logger.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())		
+		return nil, status.Error(codes.NotFound, err.Error())		
 	}
 
 	return &category_service.DeleteCategoryResponse{}, nil
