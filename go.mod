@@ -6,7 +6,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
-	github.com/labstack/gommon v0.4.0
 	github.com/lib/pq v1.2.0
 	github.com/spf13/cast v1.5.0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
@@ -20,11 +19,7 @@ require (
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/mattn/go-colorable v0.1.11 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect

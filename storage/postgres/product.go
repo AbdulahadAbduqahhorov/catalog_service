@@ -185,7 +185,7 @@ func (p productRepo) UpdateProduct(req *product_service.UpdateProductRequest) (i
 		args = append(args, req.Desc)
 		argId++
 	}
-	if req.Quantity>0 {
+	if req.Quantity>=0 {
 		setValues = append(setValues, fmt.Sprintf("quantity=$%d ", argId))
 		args = append(args, req.Quantity)
 		argId++
